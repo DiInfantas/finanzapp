@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../api';
 
 export default function Register() {
   const [nombre, setNombre] = useState('');
@@ -16,7 +16,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/registro/', {
+      const response = await api.post('auth/registro/', {
         nombre,
         correo,
         password,

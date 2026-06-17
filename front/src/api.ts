@@ -1,6 +1,21 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/';
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname.includes('diegoinfantas.dev')) {
+      return 'https://api-finanzapp.diegoinfantas.dev/api/';
+    }
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:8000/api/';
+    }
+  }
+  return 'https://api-finanzapp.diegoinfantas.dev/api/';
+};
+
+export const API_URL = getApiUrl();
 
 export const api = axios.create({
   baseURL: API_URL,
