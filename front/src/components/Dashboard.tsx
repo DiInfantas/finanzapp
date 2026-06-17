@@ -53,6 +53,8 @@ export default function Dashboard({
   const [modalOpen, setModalOpen] = useState(false)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [categoriesList, setCategoriesList] = useState<ApiCategory[]>([])
+  const [subcategoriesList, setSubcategoriesList] = useState<any[]>([])
+  const [editingTransaction, setEditingTransaction] = useState<any>(null)
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -61,13 +63,15 @@ export default function Dashboard({
     setLoading(true)
     setError('')
     try {
-      const [catsRes, incomesRes, expensesRes] = await Promise.all([
+      const [catsRes, subsRes, incomesRes, expensesRes] = await Promise.all([
         api.get('categorias/'),
+        api.get('subcategorias/'),
         api.get('ingresos/'),
         api.get('gastos/'),
       ])
 
       setCategoriesList(catsRes.data)
+      setSubcategoriesList(subsRes.data)
 
       const mappedIncomes = incomesRes.data.map((item: any) => {
         const cat = catsRes.data.find((c: any) => c.id === item.categoria)
@@ -83,10 +87,13 @@ export default function Dashboard({
 
       const mappedExpenses = expensesRes.data.map((item: any) => {
         const cat = catsRes.data.find((c: any) => c.id === item.categoria)
+        const sub = subsRes.data.find((s: any) => s.id === item.subcategoria)
         return {
           id: item.id,
           description: item.descripcion || 'Sin descripción',
           category: cat ? cat.nombre : 'Otros',
+          subcategory_nombre: sub ? sub.nombre : undefined,
+          subcategory_id: item.subcategoria,
           amount: parseFloat(item.monto),
           type: 'gasto' as TxType,
           date: item.fecha,
@@ -122,21 +129,40 @@ export default function Dashboard({
     return sorted.filter((t) => t.description.toLowerCase().includes(q) || t.category.toLowerCase().includes(q))
   }, [sorted, query])
 
+  function handleOpenEditModal(tx: any) {
+    setEditingTransaction(tx)
+    setModalOpen(true)
+  }
+
   async function handleAddTransaction(tx: {
     description: string
     category: number
+    subcategory?: number | null
     amount: number
     type: TxType
     date: string
-  }) {
+  }, id?: string | number) {
     try {
+      const isEditMode = !!id
       const endpoint = tx.type === 'ingreso' ? 'ingresos/' : 'gastos/'
-      await api.post(endpoint, {
+      const payload: any = {
         monto: tx.amount,
         categoria: tx.category,
         descripcion: tx.description,
         fecha: tx.date,
-      })
+      }
+
+      if (tx.type === 'gasto') {
+        payload.subcategoria = tx.subcategory
+      }
+
+      if (isEditMode) {
+        await api.put(`${endpoint}${id}/`, payload)
+      } else {
+        await api.post(endpoint, payload)
+      }
+      
+      setEditingTransaction(null)
       fetchData()
     } catch (err) {
       console.error('Error al guardar movimiento:', err)
@@ -335,6 +361,7 @@ export default function Dashboard({
                     <TransactionList
                       transactions={sorted.slice(0, 6)}
                       onDelete={handleDeleteTransaction}
+                      onEdit={handleOpenEditModal}
                     />
                   </div>
                 )}
@@ -363,6 +390,7 @@ export default function Dashboard({
                       title="Historial completo"
                       emptyHint="No se encontraron transacciones."
                       onDelete={handleDeleteTransaction}
+                      onEdit={handleOpenEditModal}
                     />
                   </div>
                 )}
@@ -445,9 +473,14 @@ export default function Dashboard({
 
       <AddExpenseModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false)
+          setEditingTransaction(null)
+        }}
         onAdd={handleAddTransaction}
         categoriesList={categoriesList}
+        subcategoriesList={subcategoriesList}
+        editingTransaction={editingTransaction}
       />
     </div>
   )

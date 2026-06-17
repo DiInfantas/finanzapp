@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 import { cn } from '../lib/utils'
 import {
   formatCurrency,
@@ -12,6 +12,7 @@ interface TransactionListProps {
   title?: string
   emptyHint?: string
   onDelete?: (id: string | number, type: 'ingreso' | 'gasto') => void
+  onEdit?: (tx: Transaction) => void
 }
 
 export function TransactionList({
@@ -19,6 +20,7 @@ export function TransactionList({
   title = 'Transacciones recientes',
   emptyHint = 'Aún no hay movimientos registrados.',
   onDelete,
+  onEdit,
 }: TransactionListProps) {
   return (
     <section className="rounded-2xl border border-border bg-card shadow-sm">
@@ -62,24 +64,34 @@ export function TransactionList({
                     {cat.label} · {formatDate(tx.date)}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 shrink-0 ml-2">
                   <span
                     className={cn(
-                      'shrink-0 text-sm font-semibold tabular-nums',
+                      'text-sm font-semibold tabular-nums mr-2',
                       isIncome ? 'text-success' : 'text-foreground',
                     )}
                   >
                     {isIncome ? '+' : '-'}
                     {formatCurrency(tx.amount)}
                   </span>
+                  {onEdit && (
+                    <button
+                      type="button"
+                      onClick={() => onEdit(tx)}
+                      className="p-1.5 text-muted-foreground transition-colors hover:text-primary rounded-lg hover:bg-primary/10"
+                      aria-label="Editar movimiento"
+                    >
+                      <Pencil className="size-3.5" />
+                    </button>
+                  )}
                   {onDelete && (
                     <button
                       type="button"
                       onClick={() => onDelete(tx.id, tx.type)}
-                      className="p-1 text-muted-foreground transition-colors hover:text-destructive rounded-lg hover:bg-destructive/10"
+                      className="p-1.5 text-muted-foreground transition-colors hover:text-destructive rounded-lg hover:bg-destructive/10"
                       aria-label="Eliminar movimiento"
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 className="size-3.5" />
                     </button>
                   )}
                 </div>

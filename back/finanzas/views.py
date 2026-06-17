@@ -61,3 +61,9 @@ class GastoRecurrenteViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
+        # Generar inmediatamente el primer gasto físico para el usuario
+        from .services import procesar_gastos_recurrentes
+        try:
+            procesar_gastos_recurrentes()
+        except Exception as e:
+            print("Error al procesar gastos recurrentes al crear:", e)

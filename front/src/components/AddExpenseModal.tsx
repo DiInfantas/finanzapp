@@ -9,50 +9,104 @@ interface ApiCategory {
   tipo: 'ingreso' | 'gasto' | 'ambos'
 }
 
+interface ApiSubcategory {
+  id: number
+  categoria: number
+  nombre: string
+}
+
 interface AddExpenseModalProps {
   open: boolean
   onClose: () => void
   onAdd: (tx: {
     description: string
     category: number
+    subcategory?: number | null
     amount: number
     type: TxType
     date: string
-  }) => void
+  }, id?: string | number) => void
   categoriesList: ApiCategory[]
+  subcategoriesList?: ApiSubcategory[]
+  editingTransaction?: any // If present, modal will run in Edit mode
 }
 
 const today = new Date().toISOString().slice(0, 10)
 
-export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExpenseModalProps) {
+export function AddExpenseModal({
+  open,
+  onClose,
+  onAdd,
+  categoriesList,
+  subcategoriesList = [],
+  editingTransaction = null,
+}: AddExpenseModalProps) {
   const [type, setType] = useState<TxType>('gasto')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState<string | number>('')
+  const [subcategory, setSubcategory] = useState<string | number>('')
   const [date, setDate] = useState(today)
   const [description, setDescription] = useState('')
+
+  const isEdit = !!editingTransaction
 
   const filteredCategories = categoriesList.filter((c) => {
     if (type === 'ingreso') return c.tipo === 'ingreso' || c.tipo === 'ambos';
     return c.tipo === 'gasto' || c.tipo === 'ambos';
   })
 
-  // Set default category whenever type or categoriesList changes
-  useEffect(() => {
-    if (filteredCategories.length > 0) {
-      setCategory(filteredCategories[0].id)
-    } else {
-      setCategory('')
-    }
-  }, [type, categoriesList])
+  // Filter subcategories by selected category
+  const filteredSubcategories = subcategoriesList.filter((s) => s.categoria === Number(category))
 
+  // Populate data if editing
   useEffect(() => {
     if (open) {
-      setType('gasto')
-      setAmount('')
-      setDate(today)
-      setDescription('')
+      if (editingTransaction) {
+        // Encontrar ID de categoria en base a nombre
+        const matchedCat = categoriesList.find(c => c.nombre === editingTransaction.category)
+        setType(editingTransaction.type)
+        setAmount(String(editingTransaction.amount))
+        setCategory(matchedCat ? matchedCat.id : '')
+        setDate(editingTransaction.date)
+        setDescription(editingTransaction.description)
+        
+        // Encontrar ID de subcategoria en base a nombre si tiene
+        if (editingTransaction.subcategory_id) {
+          setSubcategory(editingTransaction.subcategory_id)
+        } else if (editingTransaction.subcategory_nombre) {
+          const matchedSub = subcategoriesList.find(s => s.nombre === editingTransaction.subcategory_nombre)
+          setSubcategory(matchedSub ? matchedSub.id : '')
+        } else {
+          setSubcategory('')
+        }
+      } else {
+        setType('gasto')
+        setAmount('')
+        setDate(today)
+        setDescription('')
+        setSubcategory('')
+        if (filteredCategories.length > 0) {
+          setCategory(filteredCategories[0].id)
+        } else {
+          setCategory('')
+        }
+      }
     }
-  }, [open])
+  }, [open, editingTransaction, categoriesList])
+
+  // Set default category when type changes (only in Create mode)
+  useEffect(() => {
+    if (!isEdit && filteredCategories.length > 0) {
+      setCategory(filteredCategories[0].id)
+    }
+  }, [type])
+
+  // Reset subcategory when category changes
+  useEffect(() => {
+    if (!isEdit) {
+      setSubcategory('')
+    }
+  }, [category])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -68,13 +122,15 @@ export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExp
     e.preventDefault()
     const value = Number.parseFloat(amount)
     if (!value || value <= 0 || !category) return
+
     onAdd({
       description: description.trim() || 'Sin descripción',
       category: Number(category),
+      subcategory: type === 'gasto' && subcategory ? Number(subcategory) : null,
       amount: value,
       type,
       date,
-    })
+    }, editingTransaction?.id)
     onClose()
   }
 
@@ -83,7 +139,7 @@ export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExp
       className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Agregar movimiento"
+      aria-label={isEdit ? 'Editar movimiento' : 'Agregar movimiento'}
       onClick={onClose}
     >
       <div
@@ -91,7 +147,9 @@ export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExp
         className="w-full max-w-md rounded-t-3xl border border-border bg-card p-6 shadow-2xl duration-200 animate-in slide-in-from-bottom-4 sm:rounded-3xl sm:fade-in-0 sm:zoom-in-95"
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Agregar movimiento</h2>
+          <h2 className="text-lg font-semibold">
+            {isEdit ? 'Editar movimiento' : 'Agregar movimiento'}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -110,8 +168,9 @@ export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExp
                 key={t}
                 type="button"
                 onClick={() => {
-                  setType(t)
+                  if (!isEdit) setType(t)
                 }}
+                disabled={isEdit} // No permitir cambiar tipo en edición
                 className={cn(
                   'rounded-lg py-2 text-sm font-medium capitalize transition-all',
                   type === t
@@ -119,6 +178,7 @@ export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExp
                       ? 'bg-success text-success-foreground shadow-sm'
                       : 'bg-card text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground',
+                  isEdit && 'opacity-60 cursor-not-allowed'
                 )}
               >
                 {t}
@@ -142,7 +202,7 @@ export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExp
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
-                autoFocus
+                autoFocus={!isEdit}
                 required
                 className="w-full rounded-xl border border-input bg-background/50 py-2.5 pr-3 pl-7 text-lg font-semibold outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
               />
@@ -171,6 +231,28 @@ export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExp
               ))}
             </select>
           </div>
+
+          {/* Subcategory (Only for Expenses) */}
+          {type === 'gasto' && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="subcategory" className="text-sm font-medium">
+                Subcategoría (Opcional)
+              </label>
+              <select
+                id="subcategory"
+                value={subcategory}
+                onChange={(e) => setSubcategory(e.target.value)}
+                className="w-full rounded-xl border border-input bg-background/50 px-3 py-2.5 text-sm outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
+              >
+                <option value="">Ninguna</option>
+                {filteredSubcategories.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Date */}
           <div className="flex flex-col gap-1.5">
@@ -206,7 +288,7 @@ export function AddExpenseModal({ open, onClose, onAdd, categoriesList }: AddExp
             className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 active:scale-[0.98]"
           >
             <Check className="size-4" />
-            Guardar movimiento
+            {isEdit ? 'Guardar cambios' : 'Guardar movimiento'}
           </button>
         </form>
       </div>
