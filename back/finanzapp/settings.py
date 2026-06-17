@@ -35,7 +35,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-x1%4p4wz&2q1$_w*xdr7+0y0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['finanzapp.diegoinfantas.dev', 'localhost', '127.0.0.1', '*'])
 
 
 # Application definition
