@@ -4,14 +4,6 @@ const getApiUrl = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  if (typeof window !== 'undefined') {
-    if (window.location.hostname.includes('diegoinfantas.dev')) {
-      return 'https://api-finanzapp.diegoinfantas.dev/api/';
-    }
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:8000/api/';
-    }
-  }
   return 'https://api-finanzapp.diegoinfantas.dev/api/';
 };
 
