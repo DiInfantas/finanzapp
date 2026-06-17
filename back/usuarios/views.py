@@ -17,6 +17,24 @@ class RegistroView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         
+        # Crear categorías por defecto
+        try:
+            from finanzas.models import Categoria
+            default_categories = [
+                ('Sueldo', 'ingreso'),
+                ('Inversiones', 'ingreso'),
+                ('Comida', 'gasto'),
+                ('Transporte', 'gasto'),
+                ('Hogar', 'gasto'),
+                ('Salud', 'gasto'),
+                ('Servicios', 'gasto'),
+                ('Otros', 'gasto'),
+            ]
+            for nombre, tipo in default_categories:
+                Categoria.objects.get_or_create(usuario=user, nombre=nombre, tipo=tipo)
+        except Exception as e:
+            print("Error al crear categorías por defecto:", e)
+        
         # Generar tokens automáticamente tras el registro
         refresh = RefreshToken.for_user(user)
         
