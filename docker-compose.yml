@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: finanzapp_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-finanzapp}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: finanzapp_back
+    restart: always
+    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn finanzapp.wsgi:application --bind 0.0.0.0:8000"
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-finanzapp}
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-production-secret-key-change-me}
+      - DEBUG=${DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,back}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://localhost,http://127.0.0.1}
+    depends_on:
+      - db
+    volumes:
+      - static_volume:/app/staticfiles
+
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=/api/
+    container_name: finanzapp_front
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - back
+
+volumes:
+  pg_data:
+  static_volume:
