@@ -81,22 +81,25 @@ export function ProfileView({
         </button>
 
         {[
-          { icon: CreditCard, label: 'Métodos de pago' },
           { icon: Bell, label: 'Notificaciones' },
           { icon: Shield, label: 'Privacidad y seguridad' },
           { icon: HelpCircle, label: 'Ayuda y soporte' },
         ].map(({ icon: Icon, label }) => (
-          <button
-            key={label}
-            type="button"
-            className="flex w-full items-center gap-3 border-t border-border px-5 py-4 text-left transition-colors hover:bg-muted/50"
-          >
-            <span className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-              <Icon className="size-4" />
-            </span>
-            <span className="flex-1 text-sm font-medium">{label}</span>
-            <ChevronRight className="size-4 text-muted-foreground" />
-          </button>
+          <div key={label} className="group relative w-full">
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 border-t border-border px-5 py-4 text-left transition-colors hover:bg-muted/50"
+            >
+              <span className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                <Icon className="size-4" />
+              </span>
+              <span className="flex-1 text-sm font-medium">{label}</span>
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </button>
+            <div className="absolute right-12 top-1/2 -translate-y-1/2 pointer-events-none opacity-0 scale-95 transition-all duration-200 group-hover:opacity-100 group-hover:scale-100 bg-card text-foreground border border-border text-xs px-2.5 py-1 rounded-lg shadow-sm font-medium z-10">
+              En construcción 🛠️
+            </div>
+          </div>
         ))}
       </section>
 

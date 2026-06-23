@@ -71,7 +71,7 @@ export function BudgetsView() {
       const response = await api.post('presupuestos/', {
         categoria: Number(selectedCat),
         monto: parseFloat(amount),
-        periodo: period,
+        periodo: period + '-01',
       })
       setBudgets((prev) => [...prev, response.data])
       setAmount('')
@@ -187,7 +187,7 @@ export function BudgetsView() {
                         <div className="flex items-center justify-between text-sm">
                           <div>
                             <span className="font-semibold text-foreground">{b.categoria_nombre}</span>
-                            <span className="text-xs text-muted-foreground ml-2">({b.periodo})</span>
+                            <span className="text-xs text-muted-foreground ml-2">({b.periodo ? b.periodo.slice(0, 7) : ''})</span>
                           </div>
                           <button
                             onClick={() => handleDelete(b.id)}

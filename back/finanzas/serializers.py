@@ -66,10 +66,11 @@ class GastoSerializer(serializers.ModelSerializer):
 
 class PresupuestoSerializer(serializers.ModelSerializer):
     usuario = serializers.PrimaryKeyRelatedField(read_only=True)
+    categoria_nombre = serializers.CharField(source='categoria.nombre', read_only=True)
 
     class Meta:
         model = Presupuesto
-        fields = ('id', 'categoria', 'monto', 'periodo', 'usuario')
+        fields = ('id', 'categoria', 'categoria_nombre', 'monto', 'periodo', 'usuario')
 
     def validate(self, data):
         user = self.context['request'].user
@@ -85,10 +86,11 @@ class PresupuestoSerializer(serializers.ModelSerializer):
 
 class GastoRecurrenteSerializer(serializers.ModelSerializer):
     usuario = serializers.PrimaryKeyRelatedField(read_only=True)
+    categoria_nombre = serializers.CharField(source='categoria.nombre', read_only=True)
 
     class Meta:
         model = GastoRecurrente
-        fields = ('id', 'monto', 'frecuencia', 'categoria', 'descripcion', 'activo', 'ultimo_generado', 'usuario')
+        fields = ('id', 'monto', 'frecuencia', 'categoria', 'categoria_nombre', 'descripcion', 'activo', 'ultimo_generado', 'usuario')
 
     def validate_categoria(self, value):
         user = self.context['request'].user

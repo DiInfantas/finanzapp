@@ -360,107 +360,69 @@ Exportaciones futuras:
 
 ---
 
-# Roadmap
+# Roadmap y Estado del Proyecto
+
+A continuación se detalla el estado actual de las funcionalidades del proyecto, clasificadas en:
+* **[x] Completado (Frontend y Backend conectados)**: La funcionalidad está operativa en el backend y tiene su correspondiente interfaz y lógica conectada en el frontend.
+* **[/] Parcial (Frontend diseñado pero sin lógica o desconectado del Backend)**: Existe diseño visual en el frontend, pero no realiza peticiones reales al servidor o le falta lógica de negocio.
+* **[ ] Pendiente (No implementado)**: No existe desarrollo ni en el frontend ni en el backend.
+
+---
 
 ## MVP
 
-### Backend
+### Estructura y Configuración Base
+* [x] **Crear proyecto Django (Backend)**
+* [x] **Configurar base de datos (PostgreSQL/SQLite)**
+* [x] **Configurar Django REST Framework (Backend)**
+* [x] **Configurar autenticación JWT (Backend)**
+* [x] **Crear proyecto React + TypeScript (Frontend)**
+* [x] **Configurar TailwindCSS (Frontend)**
+* [/] **Configurar React Router**: *Instalado en package.json pero no se está usando activamente; la navegación se maneja mediante estado de pestañas en `Dashboard.tsx`.*
+* [/] **Configurar React Query**: *Instalado en package.json pero no se está usando; las peticiones HTTP se manejan directamente con Axios en los componentes.*
 
-* [x] Crear proyecto Django
-* [x] Configurar SQLite
-* [x] Configurar Django REST Framework
-* [x] Configurar autenticación JWT
-
-### Frontend
-
-* [ ] Crear proyecto React + TypeScript
-* [ ] Configurar TailwindCSS
-* [ ] Configurar React Router
-* [ ] Configurar React Query
-
-### Funcionalidades
-
-* [x] Registro de usuarios (Backend)
-* [x] Inicio de sesión (Backend)
-* [x] CRUD de ingresos (Backend)
-* [x] CRUD de gastos (Backend)
-* [x] CRUD de categorías (Backend)
-* [ ] Panel principal básico
-* [ ] Estadísticas básicas
+### Funcionalidades MVP
+* [x] **Registro de usuarios**
+* [x] **Inicio de sesión**
+* [x] **CRUD de Ingresos** (Crear, leer, editar, eliminar)
+* [x] **CRUD de Gastos** (Crear, leer, editar, eliminar)
+* [x] **CRUD de Categorías** (Crear, leer, eliminar)
+* [x] **Panel principal básico (Dashboard)**: Visualización de ingresos, gastos, balance del período y accesos rápidos.
+* [x] **Estadísticas básicas**: Distribución de gastos por categoría en la pestaña de Reportes.
 
 ---
 
-## Versión 1.1
+## Versión 1.1 (Control de Presupuestos y Filtros)
 
-* [x] CRUD de subcategorías (Backend)
-* [x] Presupuestos por período (Backend)
-* [ ] Comparación presupuesto vs gasto real
-* [ ] Filtros avanzados
-
----
-
-## Versión 1.2
-
-* [x] Gastos recurrentes (Backend)
-* [ ] Alertas de presupuesto
-* [ ] Reportes exportables
+* [x] **CRUD de Subcategorías** (Frontend y Backend conectados)
+* [x] **Presupuestos por período** (Creación y eliminación de límites)
+* [x] **Comparación presupuesto vs gasto real**: Visualizado mediante barras de progreso dinámicas con colores de alerta en la vista de presupuestos.
+* [ ] **Filtros avanzados**: Filtros por fecha, mes/año, tipo y categorías en la lista de transacciones *(Actualmente solo hay buscador por texto)*.
 
 ---
 
-## Versión 2.0
+## Versión 1.2 (Alertas y Reportes)
 
-* [ ] Metas de ahorro
-* [ ] Adjuntar comprobantes
-* [ ] Comparación avanzada de períodos
-* [ ] Multi-moneda
+* [x] **Gastos recurrentes (Suscripciones)**: Creación y listado de gastos recurrentes conectado al backend.
+* [/] **Alertas de presupuesto**: *Parcial. La barra de progreso de presupuesto cambia a color amarillo (>85%) y rojo (excedido), pero falta una alerta/notificación global en el Dashboard o por correo.*
+* [/] **Configuración de Usuario / Perfil**: *Parcial. Existe la pantalla de perfil en el frontend con botones estáticos (Métodos de pago, Notificaciones, Privacidad), pero no tienen lógica ni interactúan con el backend.*
+* [ ] **Reportes exportables (PDF, Excel, CSV)**
 
 ---
 
-# Funcionalidades Futuras
+## Versión 2.0 (Características Avanzadas)
 
-## Importación desde Excel
-
-Objetivo:
-
-Permitir que los usuarios descarguen una plantilla Excel oficial, la completen externamente y posteriormente la importen al sistema.
-
-Características:
-
-* Descargar plantilla Excel.
-* Validar estructura del archivo.
-* Detectar errores de formato.
-* Importar ingresos.
-* Importar gastos.
-* Asociar categorías automáticamente.
-* Mostrar resumen previo antes de importar.
-
-Esta funcionalidad tiene como objetivo demostrar integración con múltiples fuentes de datos y procesamiento de archivos.
-
-Estado actual:
-
-* No iniciar implementación hasta finalizar el MVP.
+* [ ] **Metas de ahorro**
+* [ ] **Adjuntar comprobantes** (Subida de archivos)
+* [ ] **Comparación avanzada de períodos**
+* [ ] **Multi-moneda**
+* [ ] **Importación desde Excel**
 
 ---
 
 # Notas de Desarrollo
 
-## Principios
+El proyecto cuenta con una base sólida Full Stack:
+1. El backend expone una API REST robusta y con persistencia configurable mediante Docker (PostgreSQL) o local (SQLite).
+2. El frontend cuenta con un diseño premium y responsivo usando TailwindCSS y componentes limpios, integrando la mayor parte de las llamadas a la API a través de Axios de manera síncrona.
 
-* Mantener el proyecto simple durante el MVP.
-* Priorizar funcionalidades antes que diseño avanzado.
-* Mantener separación clara entre frontend y backend.
-* Documentar cada avance importante.
-
-## Objetivo de Portafolio
-
-El proyecto debe demostrar experiencia en:
-
-* React + TypeScript
-* Django REST Framework
-* SQLite
-* Autenticación JWT
-* Diseño de APIs REST
-* Gestión de estados
-* Visualización de datos
-* Procesamiento de archivos Excel (futuro)
-* Despliegue de aplicaciones Full Stack
