@@ -45,12 +45,11 @@ Cada usuario tendrá acceso únicamente a su propia información mediante autent
 
 ## Base de Datos
 
-* SQLite
+* SQLite en desarrollo / Postgres en producción
 
 ## Despliegue
 
-Por definir.
-
+* Dockerizado
 ---
 
 # Funcionalidades
