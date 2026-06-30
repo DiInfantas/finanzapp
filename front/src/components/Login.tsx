@@ -34,6 +34,26 @@ export default function Login() {
       );
     } finally {
       setLoading(false);
+  };
+
+  // Demo login handler
+  const handleDemoLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const response = await api.post('auth/login/', {
+        correo: 'demo@finanzapp.local',
+        password: 'demo12345',
+      });
+      const { access, refresh, usuario } = response.data;
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+      navigate('/');
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Error al iniciar sesión demo.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -82,6 +102,15 @@ export default function Login() {
             className="w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-lg hover:shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
           >
             {loading ? 'Iniciando sesión...' : 'Ingresar'}
+          </button>
+          {/* Demo login button */}
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleDemoLogin}
+            className="mt-4 w-full py-3 px-4 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium shadow-lg hover:shadow-green-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {loading ? 'Iniciando demo...' : 'Probar Demo'}
           </button>
         </form>
 
