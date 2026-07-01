@@ -8,6 +8,7 @@ import {
   Mail,
   User,
   Wallet,
+  Sparkles,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { api } from '../api'
@@ -63,6 +64,30 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
         err.response?.data?.password?.[0] ||
         err.response?.data?.non_field_errors?.[0] ||
         'Error al procesar la solicitud. Verifique sus datos.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleDemoLogin() {
+    setError('')
+    setLoading(true)
+
+    try {
+      const response = await api.post('auth/login/', {
+        correo: 'demo@finanzapp.local',
+        password: 'demo12345',
+      })
+      const { access, refresh, usuario } = response.data
+      localStorage.setItem('access_token', access)
+      localStorage.setItem('refresh_token', refresh)
+      localStorage.setItem('usuario', JSON.stringify(usuario))
+      onAuth(usuario)
+    } catch (err: any) {
+      console.error(err)
+      setError(
+        'El servidor demo no está disponible o la cuenta aún no ha sido creada.'
       )
     } finally {
       setLoading(false)
@@ -189,6 +214,29 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
               )}
             </button>
           </form>
+
+          <div className="relative my-4 flex items-center justify-center">
+            <hr className="w-full border-border/60" />
+            <span className="absolute bg-card px-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+              O probar la app
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-primary/10 active:scale-[0.98] disabled:opacity-70"
+          >
+            {loading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <>
+                <Sparkles className="size-4 text-primary animate-pulse" />
+                Acceder como Demo
+              </>
+            )}
+          </button>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             {isRegister ? '¿Ya tienes una cuenta?' : '¿Aún no tienes cuenta?'}{' '}

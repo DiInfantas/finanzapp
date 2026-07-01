@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
     container_name: finanzapp_back
     restart: always
-    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn finanzapp.wsgi:application --bind 0.0.0.0:8000"
+    command: sh -c "python manage.py migrate && python manage.py setup_demo_user && python manage.py collectstatic --noinput && gunicorn finanzapp.wsgi:application --bind 0.0.0.0:8000"
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-finanzapp}
       - SECRET_KEY=${SECRET_KEY:-django-insecure-production-secret-key-change-me}
