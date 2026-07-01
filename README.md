@@ -6,7 +6,7 @@ Este proyecto nació con la idea de **reemplazar una planilla Excel** compleja y
 
 ---
 
-## 🚀 Características Principales (Áreas que Cubre)
+## 🚀 Características Principales
 
 *   **Autenticación Segura (JWT):** Registro e inicio de sesión seguro para cada usuario. Toda la información financiera es privada y está aislada por cuenta.
 *   **Gestión de Transacciones:** CRUD completo de **Ingresos** y **Gastos** con soporte para categorías y subcategorías personalizables.
@@ -19,22 +19,21 @@ Este proyecto nació con la idea de **reemplazar una planilla Excel** compleja y
 
 ## 🛠️ Stack Tecnológico
 
-El proyecto está diseñado bajo una arquitectura desacoplada utilizando prácticas modernas de desarrollo Full-Stack:
 
 ### Backend (API REST)
-*   **Python 3.x**
-*   **Django & Django REST Framework (DRF):** Implementación de los endpoints de la API REST que gestionan las transacciones, categorías, presupuestos y el procesamiento lógico de gastos recurrentes.
-*   **JWT (JSON Web Tokens):** Manejo de sesiones y protección de endpoints privados mediante autenticación sin estado.
-*   **PostgreSQL / SQLite:** Persistencia de datos financieros. PostgreSQL configurado para producción en contenedores y SQLite como base de datos por defecto para un inicio rápido en desarrollo local.
-*   **Whitenoise & Gunicorn:** Utilizados en producción para servir archivos estáticos eficientemente y actuar como servidor de aplicaciones WSGI respectivamente.
+
+*   **Django & Django REST Framework (DRF):** Creación de una API robusta y escalable.
+*   **JWT (JSON Web Tokens):** Manejo de sesiones y seguridad.
+*   **PostgreSQL / SQLite:** Soporte para bases de datos relacionales robustas (PostgreSQL en producción/Docker, SQLite opcional en desarrollo local).
+*   **Whitenoise & Gunicorn:** Para servir estáticos y producción.
 
 ### Frontend
-*   **React (v18+):** Biblioteca principal sobre la que se estructura toda la interfaz SPA interactiva.
-*   **TypeScript:** Garantiza la seguridad de tipos en la comunicación con los endpoints del backend y el paso de datos entre componentes de la UI.
-*   **Vite:** Tooling y empaquetador para el entorno de desarrollo y compilación optimizada de producción.
-*   **TailwindCSS:** Maquetación responsiva y estilo visual del dashboard y sus componentes sin sobrecargar el código de hojas de estilo externas.
-*   **Recharts:** Generación de gráficos dinámicos (gráfico de líneas para tendencias, gráfico de dona para categorías) en la vista de reportes financieros.
-*   **Axios:** Cliente HTTP para la comunicación directa y autenticada (añadiendo tokens JWT en las cabeceras) con la API de Django.
+*   **React**
+*   **TypeScript:** Código tipado para evitar errores en tiempo de ejecución.
+*   **Vite:** Construcción y desarrollo ultra rápido.
+*   **TailwindCSS:** Diseño visual premium, moderno e interactivo.
+*   **Recharts:** Visualizaciones y gráficos estadísticos de alta calidad.
+*   **Axios:** Consumo eficiente de la API backend.
 
 ---
 
