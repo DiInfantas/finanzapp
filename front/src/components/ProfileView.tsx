@@ -1,7 +1,6 @@
 import {
   Bell,
   ChevronRight,
-  CreditCard,
   HelpCircle,
   LogOut,
   Moon,

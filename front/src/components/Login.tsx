@@ -34,6 +34,7 @@ export default function Login() {
       );
     } finally {
       setLoading(false);
+    }
   };
 
   // Demo login handler
