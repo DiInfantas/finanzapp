@@ -186,7 +186,7 @@ export default function Dashboard({
 
   return (
     <div className="min-h-dvh bg-background">
-      <div className="mx-auto flex w-full max-w-7xl">
+      <div className="flex w-full">
         {/* Desktop sidebar */}
         <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4 lg:flex">
           <div className="flex items-center gap-2.5 px-2 py-3">
@@ -285,7 +285,7 @@ export default function Dashboard({
           </header>
 
           {/* Content */}
-          <main className="flex-1 px-4 pt-6 pb-28 sm:px-6 lg:pb-10">
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-6 pb-28 sm:px-6 lg:pb-10">
             {error && (
               <div className="mb-4 p-3 rounded-xl bg-destructive/15 border border-destructive/20 text-destructive text-sm text-center">
                 {error}
@@ -298,13 +298,25 @@ export default function Dashboard({
               <>
                 {section === 'inicio' && (
                   <div className="flex flex-col gap-6">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        ¡Hola de nuevo,
-                      </p>
-                      <h2 className="text-2xl font-semibold tracking-tight text-balance">
-                        {firstName}! 👋
-                      </h2>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          ¡Hola de nuevo,
+                        </p>
+                        <h2 className="text-2xl font-semibold tracking-tight text-balance">
+                          {firstName}! 👋
+                        </h2>
+                      </div>
+                      
+                      {/* PC add transaction button */}
+                      <button
+                        type="button"
+                        onClick={() => setModalOpen(true)}
+                        className="hidden lg:flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95"
+                      >
+                        <Plus className="size-4" />
+                        Agregar movimiento
+                      </button>
                     </div>
                     <SummaryCards
                       balance={totals.balance}
@@ -461,15 +473,8 @@ export default function Dashboard({
         </div>
       </nav>
 
-      {/* Desktop quick-add FAB */}
-      <button
-        type="button"
-        onClick={() => setModalOpen(true)}
-        className="fixed right-8 bottom-8 z-40 hidden items-center gap-2 rounded-2xl bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 active:scale-95 lg:flex"
-      >
-        <Plus className="size-5" />
-        Agregar movimiento
-      </button>
+      {/* Desktop quick-add FAB - hidden completely as requested to use inline top button on PC */}
+      <div className="hidden"></div>
 
       <AddExpenseModal
         open={modalOpen}
