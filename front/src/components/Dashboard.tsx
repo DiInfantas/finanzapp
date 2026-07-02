@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Bell, LogOut, Moon, Plus, Search, Sun, Wallet, FolderTree, Landmark, CalendarClock } from 'lucide-react'
+import { Bell, LogOut, Moon, Plus, Search, Sun, Wallet, FolderTree, Landmark, CalendarClock, User } from 'lucide-react'
 import { cn } from '../lib/utils'
 import {
   computeTotals,
@@ -17,6 +17,7 @@ import { CategoriesView } from './CategoriesView'
 import { BudgetsView } from './BudgetsView'
 import { RecurringView } from './RecurringView'
 import { api } from '../api'
+import { ConfirmModal } from './ConfirmModal'
 
 interface DashboardProps {
   userName: string
@@ -58,6 +59,21 @@ export default function Dashboard({
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [confirmConfig, setConfirmConfig] = useState<{
+    open: boolean
+    title: string
+    message: string
+    confirmText?: string
+    type?: 'danger' | 'warning' | 'info'
+    onConfirm: () => void
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  })
 
   const fetchData = async () => {
     setLoading(true)
@@ -171,15 +187,34 @@ export default function Dashboard({
   }
 
   async function handleDeleteTransaction(id: string | number, type: 'ingreso' | 'gasto') {
-    if (!confirm('¿Seguro que deseas eliminar este movimiento?')) return
-    try {
-      const endpoint = type === 'ingreso' ? 'ingresos' : 'gastos'
-      await api.delete(`${endpoint}/${id}/`)
-      setTransactions((prev) => prev.filter((t) => !(t.id === id && t.type === type)))
-    } catch (err) {
-      console.error('Error al eliminar movimiento:', err)
-      alert('No se pudo eliminar el movimiento.')
-    }
+    setConfirmConfig({
+      open: true,
+      title: 'Eliminar movimiento',
+      message: '¿Seguro que deseas eliminar este movimiento? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          const endpoint = type === 'ingreso' ? 'ingresos' : 'gastos'
+          await api.delete(`${endpoint}/${id}/`)
+          setTransactions((prev) => prev.filter((t) => !(t.id === id && t.type === type)))
+        } catch (err) {
+          console.error('Error al eliminar movimiento:', err)
+          alert('No se pudo eliminar el movimiento.')
+        }
+      }
+    })
+  }
+
+  function handleConfirmLogout() {
+    setConfirmConfig({
+      open: true,
+      title: 'Cerrar sesión',
+      message: '¿Estás seguro de que deseas cerrar sesión? Tendrás que volver a ingresar tus credenciales.',
+      confirmText: 'Cerrar sesión',
+      type: 'danger',
+      onConfirm: onLogout,
+    })
   }
 
   const firstName = userName.split(' ')[0]
@@ -223,7 +258,7 @@ export default function Dashboard({
 
           <button
             type="button"
-            onClick={onLogout}
+            onClick={handleConfirmLogout}
             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/50 hover:text-foreground"
           >
             <LogOut className="size-5" />
@@ -270,17 +305,87 @@ export default function Dashboard({
                   <Moon className="size-4" />
                 )}
               </button>
-              <button
-                type="button"
-                aria-label="Notificaciones"
-                className="relative flex size-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <Bell className="size-4" />
-                <span className="absolute top-2 right-2 size-2 rounded-full bg-primary" />
-              </button>
-              <span className="ml-1 flex size-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
-                {firstName[0]?.toUpperCase() || 'U'}
-              </span>
+              
+              {/* Notifications Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotificationsOpen(!notificationsOpen)
+                    setProfileDropdownOpen(false)
+                  }}
+                  aria-label="Notificaciones"
+                  className="relative flex size-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Bell className="size-4" />
+                  <span className="absolute top-2 right-2 size-2 rounded-full bg-primary" />
+                </button>
+
+                {notificationsOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setNotificationsOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-72 rounded-xl border border-border bg-card p-4 shadow-lg z-50 animate-in fade-in-50 slide-in-from-top-1 text-center">
+                      <p className="text-sm font-semibold text-foreground">Notificaciones</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Por el momento no tienes notificaciones.
+                      </p>
+                      <span className="inline-block mt-3 text-[10px] bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-medium">
+                        En construcción 🛠️
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Profile Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileDropdownOpen(!profileDropdownOpen)
+                    setNotificationsOpen(false)
+                  }}
+                  className="ml-1 flex size-9 cursor-pointer items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  {firstName[0]?.toUpperCase() || 'U'}
+                </button>
+
+                {profileDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setProfileDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-48 rounded-xl border border-border bg-card p-1 shadow-lg z-50 animate-in fade-in-50 slide-in-from-top-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSection('perfil')
+                          setProfileDropdownOpen(false)
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-muted/85 transition-colors text-left"
+                      >
+                        <User className="size-4" />
+                        Mi Perfil
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileDropdownOpen(false)
+                          handleConfirmLogout()
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors text-left"
+                      >
+                        <LogOut className="size-4" />
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </header>
 
@@ -297,7 +402,7 @@ export default function Dashboard({
             ) : (
               <>
                 {section === 'inicio' && (
-                  <div className="flex flex-col gap-6">
+                  <div className="animate-in fade-in-50 slide-in-from-bottom-3 duration-300 flex flex-col gap-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground">
@@ -379,7 +484,7 @@ export default function Dashboard({
                 )}
 
                 {section === 'transacciones' && (
-                  <div className="flex flex-col gap-6">
+                  <div className="animate-in fade-in-50 slide-in-from-bottom-3 duration-300 flex flex-col gap-6">
                     <div>
                       <h2 className="text-2xl font-semibold tracking-tight">
                         Transacciones
@@ -408,29 +513,39 @@ export default function Dashboard({
                 )}
 
                 {section === 'categorias' && (
-                  <CategoriesView />
+                  <div className="animate-in fade-in-50 slide-in-from-bottom-3 duration-300">
+                    <CategoriesView />
+                  </div>
                 )}
 
                 {section === 'presupuestos' && (
-                  <BudgetsView />
+                  <div className="animate-in fade-in-50 slide-in-from-bottom-3 duration-300">
+                    <BudgetsView />
+                  </div>
                 )}
 
                 {section === 'recurrentes' && (
-                  <RecurringView />
+                  <div className="animate-in fade-in-50 slide-in-from-bottom-3 duration-300">
+                    <RecurringView />
+                  </div>
                 )}
 
                 {section === 'reportes' && (
-                  <ReportsView transactions={transactions} />
+                  <div className="animate-in fade-in-50 slide-in-from-bottom-3 duration-300">
+                    <ReportsView transactions={transactions} />
+                  </div>
                 )}
 
                 {section === 'perfil' && (
-                  <ProfileView
-                    userName={userName}
-                    userEmail={userEmail}
-                    isDark={isDark}
-                    onToggleTheme={onToggleTheme}
-                    onLogout={onLogout}
-                  />
+                  <div className="animate-in fade-in-50 slide-in-from-bottom-3 duration-300">
+                    <ProfileView
+                      userName={userName}
+                      userEmail={userEmail}
+                      isDark={isDark}
+                      onToggleTheme={onToggleTheme}
+                      onLogout={handleConfirmLogout}
+                    />
+                  </div>
                 )}
               </>
             )}
@@ -486,6 +601,16 @@ export default function Dashboard({
         categoriesList={categoriesList}
         subcategoriesList={subcategoriesList}
         editingTransaction={editingTransaction}
+      />
+
+      <ConfirmModal
+        open={confirmConfig.open}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        type={confirmConfig.type}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig((prev) => ({ ...prev, open: false }))}
       />
     </div>
   )

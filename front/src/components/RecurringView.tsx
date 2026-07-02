@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2, CalendarClock, Loader2 } from 'lucide-react'
 import { api } from '../api'
 import { formatCurrency } from '../lib/finanz-data'
+import { ConfirmModal } from './ConfirmModal'
 
 interface RecurringExpense {
   id: number
@@ -30,6 +31,7 @@ export function RecurringView() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
 
   const fetchData = async () => {
     setLoading(true)
@@ -76,14 +78,8 @@ export function RecurringView() {
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Seguro que deseas eliminar este gasto recurrente?')) return
-    try {
-      await api.delete(`gastos-recurrentes/${id}/`)
-      setRecurringList((prev) => prev.filter((r) => r.id !== id))
-    } catch (err) {
-      setError('Error al intentar eliminar el gasto recurrente.')
-    }
+  const handleDelete = (id: number) => {
+    setDeleteTargetId(id)
   }
 
   return (
@@ -211,6 +207,23 @@ export function RecurringView() {
           </div>
         </>
       )}
+      <ConfirmModal
+        open={deleteTargetId !== null}
+        title="Eliminar gasto recurrente"
+        message="¿Seguro que deseas eliminar este gasto recurrente? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        type="danger"
+        onConfirm={async () => {
+          if (deleteTargetId === null) return
+          try {
+            await api.delete(`gastos-recurrentes/${deleteTargetId}/`)
+            setRecurringList((prev) => prev.filter((r) => r.id !== deleteTargetId))
+          } catch (err) {
+            setError('Error al intentar eliminar el gasto recurrente.')
+          }
+        }}
+        onClose={() => setDeleteTargetId(null)}
+      />
     </div>
   )
 }
