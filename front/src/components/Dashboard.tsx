@@ -409,7 +409,7 @@ export default function Dashboard({
                           ¡Hola de nuevo,
                         </p>
                         <h2 className="text-2xl font-semibold tracking-tight text-balance">
-                          {firstName}! 👋
+                          {userName}! 👋
                         </h2>
                       </div>
                       
